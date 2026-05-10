@@ -133,6 +133,6 @@ export const translations = {
     terminalHint: "Wpisz 'help', 'recruiter' lub 'play'",
     of: "z",
   },
-} as const;
+};
 
 export type Dict = typeof translations.en;
