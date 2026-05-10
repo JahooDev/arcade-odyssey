@@ -23,9 +23,15 @@ export const Route = createFileRoute("/")({
 });
 
 function Page() {
-  const { t, store, start, enableRecruiter, setLang } = useApp();
+  const { t, store, start, enableRecruiter, setLang, reset } = useApp();
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
+
+  const onReset = () => {
+    if (typeof window !== "undefined" && window.confirm(t.resetConfirm)) {
+      reset();
+    }
+  };
 
   return (
     <div className="relative min-h-screen text-foreground">
@@ -42,7 +48,18 @@ function Page() {
           <a href="#about" className="text-glow-cyan hover:text-glow-pink transition">{t.aboutMe.toUpperCase()}</a>
           <a href="#contact" className="text-glow-cyan hover:text-glow-pink transition">{t.contact.toUpperCase()}</a>
         </nav>
-        <LangSwitcher onChange={setLang} current={store.lang} />
+        <div className="flex items-center gap-2">
+          {(store.unlocked.length > 0 || store.recruiter) && (
+            <button
+              onClick={onReset}
+              title={t.resetProgress}
+              className="font-display text-[9px] px-2 py-1 border border-[var(--neon-pink)]/60 text-glow-pink hover:bg-[var(--neon-pink)] hover:text-background rounded-sm transition"
+            >
+              ↻ {t.resetProgress}
+            </button>
+          )}
+          <LangSwitcher onChange={setLang} current={store.lang} />
+        </div>
       </header>
 
       {/* HERO */}

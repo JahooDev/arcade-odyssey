@@ -1,13 +1,25 @@
 import { useState } from "react";
 import { ACHIEVEMENTS, useApp } from "@/lib/store";
-import { TicTacToe, Memory, Snake } from "./MiniGames";
+import { TicTacToe, Memory, Snake, Breakout, WhacABug, Reaction } from "./MiniGames";
 
-type GameKey = "tictactoe" | "memory" | "snake";
+type GameKey = "tictactoe" | "memory" | "snake" | "breakout" | "whack" | "reaction";
 
 const GAME_REWARDS: Record<GameKey, string[]> = {
-  tictactoe: ["unity", "csharp", "ts"],
+  tictactoe: ["unity", "csharp"],
   memory: ["react", "tailwind", "html", "css"],
-  snake: ["nestjs", "symfony", "java", "kotlin", "android", "swiftui", "php", "js"],
+  snake: ["js", "ts"],
+  breakout: ["nestjs", "symfony", "php"],
+  whack: ["android", "kotlin", "java"],
+  reaction: ["swiftui"],
+};
+
+const GAME_ICONS: Record<GameKey, string> = {
+  tictactoe: "⊞",
+  memory: "🧠",
+  snake: "🐍",
+  breakout: "🧱",
+  whack: "🐛",
+  reaction: "⚡",
 };
 
 export function ArcadeMachine() {
@@ -21,78 +33,90 @@ export function ArcadeMachine() {
     const id = candidates[0] ?? GAME_REWARDS[game][0];
     unlock(id);
     setReward(id);
-    setTimeout(() => setReward(null), 2200);
+    setTimeout(() => setReward(null), 2400);
   };
 
   return (
-    <div id="arcade" className="relative max-w-md mx-auto">
+    <div id="arcade" className="relative mx-auto w-full max-w-[640px] px-2 sm:px-0">
       {/* Cabinet */}
-      <div className="relative bg-gradient-arcade pixel-corners pt-4 pb-6 px-4 shadow-[var(--shadow-arcade)] border border-[oklch(0.4_0.15_320_/_0.6)]">
-        {/* Marquee */}
-        <div className="text-center mb-3">
-          <div className="inline-block px-6 py-2 bg-black/60 pixel-corners border border-[var(--neon-pink)] crt-flicker">
-            <div className="font-display text-sm text-glow-pink">ARCADE.DEV</div>
+      <div className="cabinet relative">
+        {/* Side speakers */}
+        <div className="cab-speaker cab-speaker-left" aria-hidden />
+        <div className="cab-speaker cab-speaker-right" aria-hidden />
+
+        {/* Marquee header */}
+        <div className="cab-marquee">
+          <div className="cab-marquee-inner">
+            <div className="font-display text-[11px] sm:text-sm text-glow-pink crt-flicker tracking-widest">★ ARCADE.DEV ★</div>
           </div>
         </div>
 
-        {/* Screen */}
-        <div className="crt-screen crt-scanlines p-4 min-h-[340px] flex flex-col items-center justify-center relative">
-          {reward ? (
-            <RewardSplash id={reward} />
-          ) : !game ? (
-            <div className="text-center w-full fade-up">
-              <div className="font-display text-[10px] text-glow-yellow mb-3">★ {t.selectGame} ★</div>
-              <div className="grid gap-2">
-                <GameBtn label={t.games.tictactoe} onClick={() => setGame("tictactoe")} />
-                <GameBtn label={t.games.memory} onClick={() => setGame("memory")} />
-                <GameBtn label={t.games.snake} onClick={() => setGame("snake")} />
+        {/* Bezel + Screen */}
+        <div className="cab-bezel">
+          <div className="crt-screen crt-scanlines cab-screen">
+            {reward ? (
+              <RewardSplash id={reward} />
+            ) : !game ? (
+              <div className="text-center w-full fade-up">
+                <div className="font-display text-[10px] sm:text-xs text-glow-yellow mb-3">★ {t.selectGame} ★</div>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  {(Object.keys(GAME_REWARDS) as GameKey[]).map((k) => (
+                    <GameBtn key={k} icon={GAME_ICONS[k]} label={t.games[k]} onClick={() => setGame(k)} />
+                  ))}
+                </div>
+                <div className="mt-4 text-[10px] text-muted-foreground blink">{t.insertCoin}</div>
               </div>
-              <div className="mt-4 text-[10px] text-muted-foreground blink">{t.insertCoin}</div>
-            </div>
-          ) : (
-            <div className="w-full fade-up flex flex-col items-center gap-3">
-              <div className="flex items-center justify-between w-full">
-                <div className="font-display text-[10px] text-glow-cyan">{t.games[game]}</div>
-                <button onClick={() => setGame(null)} className="font-display text-[9px] text-glow-pink hover:underline">
-                  ← {t.backToHub}
-                </button>
+            ) : (
+              <div className="w-full fade-up flex flex-col items-center gap-3">
+                <div className="flex items-center justify-between w-full">
+                  <div className="font-display text-[10px] text-glow-cyan">{t.games[game]}</div>
+                  <button onClick={() => setGame(null)} className="font-display text-[9px] text-glow-pink hover:underline">
+                    ← {t.backToHub}
+                  </button>
+                </div>
+                {game === "tictactoe" && <TicTacToe onWin={onWin} />}
+                {game === "memory" && <Memory onWin={onWin} />}
+                {game === "snake" && <Snake onWin={onWin} />}
+                {game === "breakout" && <Breakout onWin={onWin} />}
+                {game === "whack" && <WhacABug onWin={onWin} />}
+                {game === "reaction" && <Reaction onWin={onWin} />}
               </div>
-              {game === "tictactoe" && <TicTacToe onWin={onWin} />}
-              {game === "memory" && <Memory onWin={onWin} />}
-              {game === "snake" && <Snake onWin={onWin} />}
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Joystick + buttons */}
-        <div className="flex items-center justify-around mt-5 px-4">
-          <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-black/70 border-2 border-[var(--neon-cyan)] shadow-[0_0_18px_var(--neon-cyan)]" />
-            <div className="absolute left-1/2 -top-3 -translate-x-1/2 w-2 h-6 bg-gradient-to-b from-[var(--neon-pink)] to-[var(--neon-purple)] rounded-full" />
+        {/* Control panel */}
+        <div className="cab-controls">
+          <div className="joystick" aria-hidden>
+            <div className="joystick-shaft" />
+            <div className="joystick-ball" />
+            <div className="joystick-base" />
           </div>
-          <div className="flex gap-2">
-            {["pink", "yellow", "cyan", "green"].map((c) => (
-              <div key={c}
-                className="w-7 h-7 rounded-full border border-black/60"
-                style={{ background: `var(--neon-${c})`, boxShadow: `0 0 10px var(--neon-${c})` }} />
+          <div className="cab-buttons">
+            {(["pink", "yellow", "cyan", "green"] as const).map((c) => (
+              <div key={c} className="arcade-btn" style={{ background: `var(--neon-${c})`, boxShadow: `0 0 14px var(--neon-${c}), inset 0 -3px 0 oklch(0 0 0 / 0.4)` }} />
             ))}
           </div>
         </div>
 
         {/* Coin slot */}
-        <div className="mt-4 mx-auto w-24 h-3 rounded-sm bg-black/70 border border-[var(--neon-yellow)]" />
+        <div className="cab-coin">
+          <div className="coin-slot" />
+          <div className="font-display text-[8px] text-glow-yellow mt-1 tracking-widest">INSERT COIN</div>
+        </div>
       </div>
 
       {/* Stand */}
-      <div className="mx-auto w-3/4 h-6 bg-gradient-to-b from-[oklch(0.18_0.05_280)] to-[oklch(0.1_0.04_280)] rounded-b-2xl border-x border-b border-[var(--neon-pink)]/40" />
+      <div className="cab-stand" />
+      <div className="cab-shadow" />
     </div>
   );
 }
 
-function GameBtn({ label, onClick }: { label: string; onClick: () => void }) {
+function GameBtn({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="neon-btn neon-btn-pink w-full">
-      ▶ {label}
+    <button onClick={onClick} className="neon-btn neon-btn-pink w-full flex items-center justify-center gap-2 py-2 text-[10px]">
+      <span className="text-base">{icon}</span> {label}
     </button>
   );
 }
