@@ -9,6 +9,6 @@ COPY . .
 
 RUN npm run build
 
-EXPOSE 5173
+EXPOSE 3000
 
-CMD ["node", "dist/server/index.js"]
+CMD ["npx", "vinxi", "start"]
